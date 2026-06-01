@@ -1,31 +1,35 @@
 import sys
-import requests
+import random
 
-def generate_commit_message(prompt):
-    print("Thinking... Generating your commit message...")
+def generate_local_commit(prompt):
+    print(" Analyzing your changes...")
     
-    # Using a free, no-auth duckduckgo AI proxy for speed
-    url = "https://duckduckgo.com/duckduckgo-html-search" # Example placeholder
-    # For a real, instant script, we will use the free community translation/text API
-    # Let's use a reliable, free text generation endpoint
-    api_url = f"https://api.popcat.xyz/chatbot?msg=Write a short, professional git commit message for: {prompt}"
+    prompt_lower = prompt.lower()
     
-    try:
-        response = requests.get(api_url)
-        if response.status_code == 200:
-            data = response.json()
-            # Clean up the response
-            msg = data.get("response", "Update files")
-            print("\n Generated Commit Message:")
-            print(f'git commit -m "{msg}"')
-        else:
-            print(" Failed to connect to the AI model. Try again!")
-    except Exception as e:
-        print(f" Error: {e}")
+    # Conventional Commits rules
+    if "fix" in prompt_lower or "bug" in prompt_lower or "crash" in prompt_lower:
+        prefix = "fix: "
+    elif "add" in prompt_lower or "create" in prompt_lower or "new" in prompt_lower:
+        prefix = "feat: "
+    elif "docs" in prompt_lower or "readme" in prompt_lower:
+        prefix = "docs: "
+    elif "clean" in prompt_lower or "refactor" in prompt_lower:
+        prefix = "refactor: "
+    else:
+        prefix = "chore: "
+
+    # Clean up the prompt to make it a sharp commit message
+    clean_prompt = prompt.replace("fixed a ", "").replace("added a ", "").replace("fixed ", "").replace("added ", "")
+    clean_prompt = clean_prompt.strip().lower()
+    
+    final_message = f"{prefix}{clean_prompt}"
+    
+    print("\n Generated Commit Message:")
+    print(f'git commit -m "{final_message}"')
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python app.py 'your description of changes'")
     else:
         user_prompt = " ".join(sys.argv[1:])
-        generate_commit_message(user_prompt)
+        generate_local_commit(user_prompt)
